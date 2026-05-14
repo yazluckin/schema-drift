@@ -1,34 +1,40 @@
-/**
- * Core types for schema-drift detection.
- */
-
-export type PrimitiveType = 'string' | 'number' | 'boolean' | 'null' | 'undefined';
-
-export type SchemaType =
-  | PrimitiveType
+/** Supported primitive field types for schema validation. */
+export type FieldType =
+  | 'string'
+  | 'number'
+  | 'boolean'
   | 'object'
   | 'array'
-  | 'unknown';
+  | 'any';
 
-export interface FieldSchema {
-  type: SchemaType;
+/** Definition of a single field within a schema. */
+export interface FieldDefinition {
+  type: FieldType;
   required: boolean;
-  children?: Record<string, FieldSchema>; // for object types
-  items?: FieldSchema;                    // for array types
+  /** For array fields: the expected type of each element. */
+  itemType?: FieldType;
+  /** For object fields: the nested schema definition. */
+  nested?: SchemaDefinition;
 }
 
+/** Top-level schema definition describing an expected JSON shape. */
 export interface SchemaDefinition {
-  [fieldName: string]: FieldSchema;
+  name: string;
+  fields: Record<string, FieldDefinition>;
 }
 
+/** A single detected mismatch between schema and payload. */
 export interface DriftViolation {
-  path: string;
-  expected: SchemaType;
-  received: SchemaType;
+  field: string;
+  expected: FieldType;
+  received: string;
   message: string;
 }
 
-export interface DriftResult {
-  valid: boolean;
+/** Aggregated result of a schema drift detection run. */
+export interface DriftReport {
+  schema: string;
+  timestamp: string;
   violations: DriftViolation[];
+  passed: boolean;
 }
