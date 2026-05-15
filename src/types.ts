@@ -1,51 +1,56 @@
-/**
- * Supported primitive and composite types within a schema field.
- */
-export type FieldType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'object'
-  | 'array'
-  | 'null'
-  | 'unknown';
+export type PrimitiveType = 'string' | 'number' | 'boolean' | 'null' | 'undefined';
 
-/**
- * Describes a single field within a Schema.
- */
-export interface SchemaField {
+export type FieldType = PrimitiveType | 'object' | 'array' | 'unknown';
+
+export interface FieldSchema {
   type: FieldType;
   required: boolean;
-  /** For object fields: nested schema definition */
-  nested?: Schema;
-  /** For array fields: schema of each item */
-  items?: SchemaField;
+  nullable?: boolean;
+  items?: FieldSchema;        // for arrays
+  properties?: SchemaMap;    // for objects
 }
 
-/**
- * Represents the schema of a TypeScript interface or object shape.
- */
+export type SchemaMap = Record<string, FieldSchema>;
+
 export interface Schema {
   name: string;
-  fields: Record<string, SchemaField>;
+  version?: string;
+  fields: SchemaMap;
 }
 
-/**
- * Describes a single drift violation found during validation.
- */
 export interface Violation {
   field: string;
-  expected: string;
-  received: string;
+  expectedType: FieldType;
+  receivedType: FieldType;
   message: string;
+  severity: 'error' | 'warning';
 }
 
-/**
- * The result produced by detectDrift, containing all violations found.
- */
 export interface DriftReport {
   schemaName: string;
-  passed: boolean;
+  timestamp: string;
   violations: Violation[];
-  timestamp?: string;
+  passed: boolean;
+  summary: string;
+}
+
+export interface SchemaSnapshot {
+  schema: Schema;
+  capturedAt: string;
+  source: string;
+}
+
+export interface SnapshotDiff {
+  added: string[];
+  removed: string[];
+  changed: string[];
+  identical: boolean;
+}
+
+export interface EvolutionEntry {
+  snapshotId: string;
+  schema: Schema;
+  capturedAt: string;
+  source: string;
+  diff?: SnapshotDiff;
 }
