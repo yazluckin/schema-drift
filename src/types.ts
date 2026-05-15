@@ -1,40 +1,51 @@
-/** Supported primitive field types for schema validation. */
+/**
+ * Supported primitive and composite types within a schema field.
+ */
 export type FieldType =
   | 'string'
   | 'number'
   | 'boolean'
   | 'object'
   | 'array'
-  | 'any';
+  | 'null'
+  | 'unknown';
 
-/** Definition of a single field within a schema. */
-export interface FieldDefinition {
+/**
+ * Describes a single field within a Schema.
+ */
+export interface SchemaField {
   type: FieldType;
   required: boolean;
-  /** For array fields: the expected type of each element. */
-  itemType?: FieldType;
-  /** For object fields: the nested schema definition. */
-  nested?: SchemaDefinition;
+  /** For object fields: nested schema definition */
+  nested?: Schema;
+  /** For array fields: schema of each item */
+  items?: SchemaField;
 }
 
-/** Top-level schema definition describing an expected JSON shape. */
-export interface SchemaDefinition {
+/**
+ * Represents the schema of a TypeScript interface or object shape.
+ */
+export interface Schema {
   name: string;
-  fields: Record<string, FieldDefinition>;
+  fields: Record<string, SchemaField>;
 }
 
-/** A single detected mismatch between schema and payload. */
-export interface DriftViolation {
+/**
+ * Describes a single drift violation found during validation.
+ */
+export interface Violation {
   field: string;
-  expected: FieldType;
+  expected: string;
   received: string;
   message: string;
 }
 
-/** Aggregated result of a schema drift detection run. */
+/**
+ * The result produced by detectDrift, containing all violations found.
+ */
 export interface DriftReport {
-  schema: string;
-  timestamp: string;
-  violations: DriftViolation[];
+  schemaName: string;
   passed: boolean;
+  violations: Violation[];
+  timestamp?: string;
 }
