@@ -71,3 +71,17 @@ export function getLatestSnapshot(schemaName: string): EvolutionEntry | undefine
   const history = snapshotStore.get(schemaName);
   return history && history.length > 0 ? history[history.length - 1] : undefined;
 }
+
+/**
+ * Returns the evolution entry at a specific index in the history for the given schema.
+ * Supports negative indices (e.g., -1 for the last entry, -2 for the second to last).
+ */
+export function getSnapshotAt(schemaName: string, index: number): EvolutionEntry | undefined {
+  const history = snapshotStore.get(schemaName);
+  if (!history || history.length === 0) return undefined;
+
+  const resolvedIndex = index < 0 ? history.length + index : index;
+  if (resolvedIndex < 0 || resolvedIndex >= history.length) return undefined;
+
+  return history[resolvedIndex];
+}
